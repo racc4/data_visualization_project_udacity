@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+    
+    <style>
+	
+		h1 {
+		text-align: center;
+		font-family: Arial, Helvetica, sans-serif;
+		}
+		
+		h2 {
+		text-align: center;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 14px;
+		}
+		circle {
+		fill: dimblue;
+		stroke: dimgrey;
+		opacity: 0.5;
+		}  
+		
+	    .line {
+        stroke: darkRed;
+        stroke-width: 2px;
+		opacity: 0.45;
+		}
+		
+		#callout {
+        font-weight: bold;
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
+		}
+		
+		p {
+		text-align: center;
+        vertical-align: top;
+        font-family: Arial, Helvetica, sans-serif;
+		}
+		
+		text {
+        font-weight: bold;
+		font-family: Arial, Helvetica, sans-serif;
+		}
+		
+	
+    </style>
+
+    <script type="text/javascript">
+		
+		// data is calculated using pandas library on python.
+		var Textq1 = 'Q1: Top players. Great combination of HR and BA. Population stats: Count=459, BA mean=0.26, HR mean= 98.4';
+		var Textq2 = 'Q2: No balanced players. Good HR marks but low BA. Population stats: Count=129, BA mean=0.22, HR mean= 40.6';
+		var Textq3 = 'Q3: Worst players. Low HR and BA marks. Population stats: Count=129, BA mean=0.07, HR mean= 2.42';
+		var Textq4 = 'Q4: No balanced players. Good BA marks but low HR. Population stats: Count=129, BA mean=0.25, HR mean= 7.74';
+		var Textb = '';
+		
+		//animation on text
+		function text_animation(text) {
+			d3.select('#callout').remove();
+			d3.selectAll('p')
+				.text(text);
+			}
+		
+		
+		function draw(data) {  
+			  
+			//D3.js setup code
+			 
+			
+			"use strict";
+			var margin = 70,
+				width = 930 - margin,
+				height = 600 - margin;
+			
+			d3.selectAll('body')
+			  .append('h1')
+			  .text('HR and batting average relation in baseball players');
+			  
+			d3.selectAll('body')
+			  .append('h2')
+			  .text('Representation of data containing 1,157 baseball players batting average and home runs. Through this graph it is possible to observe the relation between both parameters and make a classification of players');
+	 
+			var core = d3.selectAll('body')
+			  .append('div')
+			  .attr('id', 'core'); //('id', 'chart')
+	 
+			var svg = core.append('div')
+			   .attr('id','chart')
+			   .append("svg")
+			   .attr("width", width + margin)
+			   .attr("height", height + margin)
+			   .append('g')
+			   .attr('class','chart');
+			   
+			   
+			   
+			  
+			// Dimple.js Chart construction code
+				
+			var chart = new dimple.chart(svg, data);
+			
+			// Axis definition:
+			
+			var x = chart.addMeasureAxis('x', 'avg');
+			x.showGridlines = true;
+			x.title = "Batting Average (BA)";
+			x.tickFormat = ",.2f";
+			
+			var y = chart.addLogAxis('y', 'HR');
+			y.showGridlines = true;
+			y.title = "Home Runs (HR) [logarithmic]";
+			
+			chart.addSeries(['name','handedness', ''], dimple.plot.scatter);
+			chart.draw();
+
+			//circles configuration:
+			var circles = d3.selectAll('circle')
+			  .attr('r', 6)
+			 
+			//lines configuration:
+			var line = d3.svg.line()
+			  .x((d) => { return x._scale(d[0]); })
+			  .y((d) => { return y._scale(d[1]); });
+
+			svg.append('path')
+				.datum(d3.range(1000).map((x) => { return [x,15]; }))
+				.attr('class', 'line')
+				.attr('d', line);
+				
+			svg.append('path')
+				.datum(d3.range(1000).map((y) => { return [0.23,y]; }))
+				.attr('class', 'line')
+				.attr('d', line); 
+				
+			//QX texts
+			
+			var text_Q1 = svg.append('text')
+				.attr('x', x._scale(0.31))
+				.attr('y', y._scale(400))
+				.text("Q1")
+				.style("font-size", "30px")
+				.style('fill', '#54b091')
+				.style('font-weight', 'bold')
+				.style('font-family', 'Arial')
+				.on('mouseover', () => { text_animation(Textq1); })
+				.on('mouseout', () => { text_animation(Textb); addCallout();});
+			
+			var text_Q2 = svg.append('text')
+				.attr('x', x._scale(0.12))
+				.attr('y', y._scale(400))
+				.text("Q2")
+				.style("font-size", "30px")
+				.style('fill', '#1d72a3')
+				.style('font-weight', 'bold')
+				.style('font-family', 'Arial')
+				.on('mouseover', () => { text_animation(Textq2); })
+				.on('mouseout', () => { text_animation(Textb); addCallout();});
+			
+			var text_Q3 = svg.append('text')
+				.attr('x', x._scale(0.12))
+				.attr('y', y._scale(0.4))
+				.text("Q3")
+				.style("font-size", "30px")
+				.style('fill', '#b33e3e')
+				.style('font-weight', 'bold')
+				.style('font-family', 'Arial')
+				.on('mouseover', () => { text_animation(Textq3); })
+				.on('mouseout', () => { text_animation(Textb); addCallout();});
+			
+			var text_Q4 = svg.append('text')
+				.attr('x', x._scale(0.31))
+				.attr('y', y._scale(0.4))
+				.text("Q4")
+				.style("font-size", "30px")
+				.style('fill', '#1d72a3')
+				.style('font-weight', 'bold')
+				.style('font-family', 'Arial')
+				.on('mouseover', () => { text_animation(Textq4); })
+				.on('mouseout', () => { text_animation(Textb); addCallout();});
+				
+			var text_avgHR = svg.append('text')
+				.attr('x', x._scale(0.03))
+				.attr('y', y._scale(15.5))
+				.text("HR median")
+				.style("font-size", "15px")
+				.style('fill', 'darkRed')
+				.style('font-weight', 'bold')
+				.style('font-family', 'Arial')
+				.style('opacity',0.7)
+			
+			var text_avgBA = svg.append('text')
+				.attr('x', x._scale(0.232))
+				.attr('y', y._scale(0.3))
+				.text("BA median")
+				.style("font-size", "15px")
+				.style('fill', 'darkRed')
+				.style('font-weight', 'bold')
+				.style('font-family', 'Arial')
+				.style('opacity',0.7)
+			
+			var aside = core.append('aside');
+			aside.append('p')
+				.text(Textb);
+			
+			function addCallout() {
+				aside.append('div')
+				.attr('id', 'callout')
+				.text(' - For addiontal info hover over the Q tags -');
+				};
+			addCallout();
+		}
+
+	  
+    </script>
+  </head>
+  <body>
+  </body>
+  <script type="text/javascript">
+    d3.csv('baseball_data.csv', draw);
+  </script>
+</html>
